@@ -18,12 +18,12 @@ except Exception as e:
     print(f"Warning: Error loading .env file: {e}")
     print("Environment variables must be set manually.")
 
-# Import components using absolute imports
-from app.components.query_processor import QueryProcessor
-from app.components.wayback_client import WaybackClient
-from app.components.content_extractor import ContentExtractor
-from app.components.content_analyzer import ContentAnalyzer
-from app.components.response_generator import ResponseGenerator
+# Import components using relative imports
+from .components.query_processor import QueryProcessor
+from .components.wayback_client import WaybackClient
+from .components.content_extractor import ContentExtractor
+from .components.content_analyzer import ContentAnalyzer
+from .components.response_generator import ResponseGenerator
 
 # Set page config
 st.set_page_config(
