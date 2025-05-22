@@ -2,9 +2,13 @@
 Main Streamlit application for the Wayback Ecommerce Chatbot.
 """
 
+import os
+import sys
+# Add the parent directory of the app folder to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import streamlit as st
 import datetime
-import os
 import time
 
 # Try to import dotenv, but handle the case where it might not be available
