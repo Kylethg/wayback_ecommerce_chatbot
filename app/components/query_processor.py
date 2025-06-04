@@ -12,7 +12,7 @@ import google.generativeai as genai
 class QueryProcessor:
     """Extract information from natural language queries"""
     
-    def __init__(self, api_key: Optional[str] = None, model_name: str = 'gemini-1.5-pro'):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = 'gemini-2.5-flash-preview-04-17'):
         # Initialize Google Gemini client for date inference
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
         genai.configure(api_key=self.api_key)

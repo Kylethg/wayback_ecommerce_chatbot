@@ -14,13 +14,13 @@ from app.utils.error_handling import retry_with_exponential_backoff
 class ContentAnalyzer:
     """Analyze extracted content using Google Gemini"""
     
-    def __init__(self, api_key: Optional[str] = None, model_name: str = 'gemini-1.5-pro'):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = 'gemini-2.5-flash-preview-04-17'):
         """
         Initialize the content analyzer
         
         Args:
             api_key: Google Gemini API key (optional, defaults to environment variable)
-            model_name: Gemini model name to use (default: gemini-1.5-pro)
+            model_name: Gemini model name to use (default: gemini-2.5-flash-preview-04-17)
         """
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
         genai.configure(api_key=self.api_key)

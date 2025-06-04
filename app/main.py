@@ -107,7 +107,7 @@ with st.sidebar:
     st.markdown("### 🔧 Advanced Options")
     model_choice = st.selectbox(
         "Gemini Model",
-        ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-pro"],
+        ["gemini-2.5-flash-preview-04-17", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-pro"],
         index=0
     )
     
