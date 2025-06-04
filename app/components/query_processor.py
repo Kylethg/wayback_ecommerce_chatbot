@@ -127,8 +127,23 @@ class QueryProcessor:
                 )
             )
             
-            # Get the response text
-            date_text = response.text.strip()
+            # Try to get text using the .text property first (simpler approach)
+            try:
+                date_text = response.text.strip()
+            except (ValueError, AttributeError) as e:
+                # If that fails, try the more detailed approach
+                if not response.candidates:
+                    raise ValueError("No response candidates generated. Content may have been blocked.")
+                
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'finish_reason') and candidate.finish_reason == genai.types.FinishReason.SAFETY:
+                    raise ValueError("Response was blocked due to safety filters.")
+                
+                if not candidate.content or not candidate.content.parts:
+                    raise ValueError("No content in response.")
+                
+                # Get the response text
+                date_text = candidate.content.parts[0].text.strip()
             
             # Check if the response is a relative time period
             if "ago" in date_text.lower():

@@ -211,12 +211,17 @@ if st.button("🔍 Get Insights", type="primary") and query:
                     
                     # Step 4: Analyze with AI
                     with st.spinner("🧠 Analyzing with AI..."):
-                        insights = content_analyzer.analyze_content(
-                            query_info["domain"],
-                            found_date,
-                            formatted_content,
-                            query
-                        )
+                        try:
+                            insights = content_analyzer.analyze_content(
+                                query_info["domain"],
+                                found_date,
+                                formatted_content,
+                                query
+                            )
+                        except Exception as e:
+                            st.error(f"AI analysis failed: {str(e)}")
+                            st.error("This might be due to content filtering, API limits, or network issues. Please try again.")
+                            st.stop()
                     
                     # Store wayback URL
                     wayback_url = wayback_client.get_wayback_url(timestamp, original_url)

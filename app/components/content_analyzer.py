@@ -121,4 +121,20 @@ class ContentAnalyzer:
             )
         )
         
-        return response.text
+        # Try to get text using the .text property first (simpler approach)
+        try:
+            return response.text
+        except (ValueError, AttributeError) as e:
+            # If that fails, try the more detailed approach
+            if not response.candidates:
+                raise ValueError("No response candidates generated. Content may have been blocked.")
+            
+            candidate = response.candidates[0]
+            if hasattr(candidate, 'finish_reason') and candidate.finish_reason == genai.types.FinishReason.SAFETY:
+                raise ValueError("Response was blocked due to safety filters.")
+            
+            if not candidate.content or not candidate.content.parts:
+                raise ValueError("No content in response.")
+            
+            # Extract text from the response
+            return candidate.content.parts[0].text
