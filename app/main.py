@@ -87,11 +87,11 @@ st.markdown("""
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# Initialize components
-query_processor = QueryProcessor()
+# Initialize components (will be re-initialized with model choice later)
+query_processor = None
 wayback_client = WaybackClient()
 content_extractor = ContentExtractor()
-content_analyzer = ContentAnalyzer()
+content_analyzer = None
 response_generator = ResponseGenerator()
 
 # Sidebar
@@ -99,19 +99,24 @@ with st.sidebar:
     st.markdown("### ⚙️ Settings")
     
     # API key input (optional if not using environment variable)
-    api_key = st.text_input("OpenAI API Key (optional)", type="password")
+    api_key = st.text_input("Gemini API Key (optional)", type="password")
     if api_key:
-        os.environ["OPENAI_API_KEY"] = api_key
+        os.environ["GEMINI_API_KEY"] = api_key
     
     # Advanced options
     st.markdown("### 🔧 Advanced Options")
     model_choice = st.selectbox(
-        "OpenAI Model",
-        ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"],
+        "Gemini Model",
+        ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-pro"],
         index=0
     )
     
     max_retries = st.slider("Max API Retries", 1, 5, 3)
+    
+    # Initialize AI components with selected model
+    if query_processor is None or content_analyzer is None:
+        query_processor = QueryProcessor(model_name=model_choice)
+        content_analyzer = ContentAnalyzer(model_name=model_choice)
     
     # Query history
     st.markdown("### 📜 Recent Queries")
@@ -260,7 +265,7 @@ if st.button("🔍 Get Insights", type="primary") and query:
 st.markdown("---")
 st.markdown("""
 <p class="metadata">
-Powered by Wayback Machine and OpenAI | Data retrieved from web.archive.org
+Powered by Wayback Machine and Google Gemini | Data retrieved from web.archive.org
 </p>
 """, unsafe_allow_html=True)
 

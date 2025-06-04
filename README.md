@@ -19,7 +19,7 @@ A Python-based web application that allows ecommerce trading managers to query h
    ```
 3. Set up environment variables:
    - Create a `.env` file in the project root
-   - Add your OpenAI API key: `OPENAI_API_KEY=your_api_key_here`
+   - Add your Google Gemini API key: `GEMINI_API_KEY=your_api_key_here`
 
 ## Usage
 
@@ -43,7 +43,7 @@ Then open your browser to http://localhost:8501
       query_processor.py   # Extract info from queries
       wayback_client.py    # Wayback Machine API client
       content_extractor.py # HTML parsing and extraction
-      content_analyzer.py  # OpenAI integration
+      content_analyzer.py  # Google Gemini integration
       response_generator.py # Format responses
     /utils
       __init__.py

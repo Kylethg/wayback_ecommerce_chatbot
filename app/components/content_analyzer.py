@@ -1,28 +1,30 @@
 """
-Content analyzer using OpenAI for the Wayback Ecommerce Chatbot.
+Content analyzer using Google Gemini for the Wayback Ecommerce Chatbot.
 """
 
 import os
 import datetime
 from typing import Optional, Dict, Any
-from openai import OpenAI
+import google.generativeai as genai
 
 # Change relative imports to absolute imports
 from app.utils.cache import cache_result
 from app.utils.error_handling import retry_with_exponential_backoff
 
 class ContentAnalyzer:
-    """Analyze extracted content using OpenAI"""
+    """Analyze extracted content using Google Gemini"""
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = 'gemini-1.5-pro'):
         """
         Initialize the content analyzer
         
         Args:
-            api_key: OpenAI API key (optional, defaults to environment variable)
+            api_key: Google Gemini API key (optional, defaults to environment variable)
+            model_name: Gemini model name to use (default: gemini-1.5-pro)
         """
-        self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
-        self.client = OpenAI(api_key=self.api_key)
+        self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
+        genai.configure(api_key=self.api_key)
+        self.model = genai.GenerativeModel(model_name)
         
         # Seasonal retail context by month
         self.seasonal_context = {
@@ -42,10 +44,10 @@ class ContentAnalyzer:
     
     @cache_result(expire_after_days=7)
     @retry_with_exponential_backoff(max_retries=3)
-    def analyze_content(self, domain: str, snapshot_date: datetime.date, 
+    def analyze_content(self, domain: str, snapshot_date: datetime.date,
                        extracted_content: str, query_context: Optional[str] = None) -> str:
         """
-        Analyze extracted content using OpenAI
+        Analyze extracted content using Google Gemini
         
         Args:
             domain: Domain name of the website
@@ -106,18 +108,17 @@ class ContentAnalyzer:
         if month in self.seasonal_context:
             user_prompt += f"\n\nNote that this snapshot is from {month}, which typically features {self.seasonal_context[month]} in retail."
         
-        # Make the API call with carefully structured prompts
-        response = self.client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.4,  # Lower temperature for more focused, consistent results
-            max_tokens=1000,
-            top_p=0.95,
-            frequency_penalty=0.3,  # Reduce repetition
-            presence_penalty=0.2    # Encourage diverse content
+        # Combine system and user prompts for Gemini
+        full_prompt = f"{system_prompt}\n\n{user_prompt}"
+        
+        # Make the API call with Gemini
+        response = self.model.generate_content(
+            full_prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.4,  # Lower temperature for more focused, consistent results
+                max_output_tokens=1000,
+                top_p=0.95,
+            )
         )
         
-        return response.choices[0].message.content
+        return response.text

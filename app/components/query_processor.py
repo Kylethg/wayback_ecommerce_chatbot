@@ -7,15 +7,16 @@ import datetime
 import os
 from dateutil.relativedelta import relativedelta
 from typing import Tuple, Optional, Dict, Any
-from openai import OpenAI
+import google.generativeai as genai
 
 class QueryProcessor:
     """Extract information from natural language queries"""
     
-    def __init__(self, api_key: Optional[str] = None):
-        # Initialize OpenAI client for date inference
-        self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
-        self.client = OpenAI(api_key=self.api_key)
+    def __init__(self, api_key: Optional[str] = None, model_name: str = 'gemini-1.5-pro'):
+        # Initialize Google Gemini client for date inference
+        self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
+        genai.configure(api_key=self.api_key)
+        self.model = genai.GenerativeModel(model_name)
         
         # Common time period patterns
         self.time_patterns = {
@@ -92,7 +93,7 @@ class QueryProcessor:
     
     def _infer_date_with_llm(self, query: str) -> datetime.date:
         """
-        Use OpenAI to infer a date from the query
+        Use Google Gemini to infer a date from the query
         
         Args:
             query: User query as string
@@ -114,19 +115,20 @@ class QueryProcessor:
         """
         
         try:
-            # Call the OpenAI API
-            response = self.client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a date extraction assistant. Extract dates or time periods from queries."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.1,  # Low temperature for more deterministic results
-                max_tokens=50
+            # Combine system and user prompts for Gemini
+            full_prompt = "You are a date extraction assistant. Extract dates or time periods from queries.\n\n" + prompt
+            
+            # Call the Gemini API
+            response = self.model.generate_content(
+                full_prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.1,  # Low temperature for more deterministic results
+                    max_output_tokens=50
+                )
             )
             
             # Get the response text
-            date_text = response.choices[0].message.content.strip()
+            date_text = response.text.strip()
             
             # Check if the response is a relative time period
             if "ago" in date_text.lower():
