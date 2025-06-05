@@ -116,7 +116,7 @@ class ContentAnalyzer:
             full_prompt,
             generation_config=genai.types.GenerationConfig(
                 temperature=0.4,  # Lower temperature for more focused, consistent results
-                max_output_tokens=1000,
+                max_output_tokens=10000,
                 top_p=0.95,
             )
         )
