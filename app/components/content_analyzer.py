@@ -14,7 +14,7 @@ from app.utils.error_handling import retry_with_exponential_backoff
 class ContentAnalyzer:
     """Analyze extracted content using Google Gemini"""
     
-    def __init__(self, api_key: Optional[str] = None, model_name: str = 'gemini-2.5-flash-preview-04-17'):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = 'gemini-1.5-flash'):
         """
         Initialize the content analyzer
         
@@ -130,8 +130,14 @@ class ContentAnalyzer:
                 raise ValueError("No response candidates generated. Content may have been blocked.")
             
             candidate = response.candidates[0]
-            if hasattr(candidate, 'finish_reason') and candidate.finish_reason == genai.types.FinishReason.SAFETY:
-                raise ValueError("Response was blocked due to safety filters.")
+            # Check finish reason using the enum
+            if hasattr(candidate, 'finish_reason'):
+                # Import the FinishReason enum from the candidate class
+                FinishReason = candidate.FinishReason
+                if candidate.finish_reason == FinishReason.SAFETY:
+                    raise ValueError("Response was blocked due to safety filters.")
+                elif candidate.finish_reason != FinishReason.STOP:
+                    raise ValueError(f"Response generation stopped with reason: {candidate.finish_reason}")
             
             if not candidate.content or not candidate.content.parts:
                 raise ValueError("No content in response.")
